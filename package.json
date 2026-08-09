@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest run",
-    "simulate": "tsx scripts/simulate-city-distribution.ts"
+    "simulate": "tsx scripts/simulate-city-distribution.ts",
+    "audit:city-sources": "tsx scripts/audit-city-sources.ts"
   },
   "dependencies": {
     "next": "15.5.2",
