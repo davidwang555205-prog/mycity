@@ -15,21 +15,21 @@
     "test:e2e:mobile": "playwright test tests/e2e/mobile.spec.ts"
   },
   "dependencies": {
-    "next": "15.5.2",
+    "next": "^15.5.21",
     "react": "19.1.1",
     "react-dom": "19.1.1"
   },
   "devDependencies": {
     "@eslint/js": "9.35.0",
-    "@playwright/test": "1.55.0",
+    "@playwright/test": "^1.55.1",
     "@types/node": "22.18.0",
     "@types/react": "19.1.12",
     "@types/react-dom": "19.1.9",
     "@typescript-eslint/parser": "8.42.0",
     "eslint": "9.35.0",
-    "eslint-config-next": "15.5.2",
-    "typescript": "5.9.2",
+    "eslint-config-next": "^15.5.21",
     "tsx": "4.20.5",
-    "vitest": "3.2.4"
+    "typescript": "5.9.2",
+    "vitest": "^3.2.7"
   }
 }
