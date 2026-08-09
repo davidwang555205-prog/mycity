@@ -17,12 +17,36 @@ const prompts: Record<LifeDimension, string[]> = {
   ROOT: ["想象五年后的生活，你更看重？", "一座城市让你留下来是因为？", "你希望与社区建立？", "谈到安家，你想到？", "人生重要阶段，你希望身边有？", "你如何选择长期居住地？", "一份稳定感来自？", "你希望城市对你意味着？"]
 };
 const effect = (d: LifeDimension, v: number): Effects => ({ [d]: v, ...(d === "AMB" ? { NOV: v / 2, PACE: -v / 3 } : d === "PACE" ? { SPACE: v / 3, AMB: -v / 3 } : d === "COST" ? { SPACE: v / 3 } : {}) });
-const options = (d: LifeDimension): QuestionOption[] => [
-  { id: "a", text: "我会优先选择资源密集、变化更快的那一边", effects: effect(d, d === "PACE" || d === "COST" || d === "ROOT" ? -3 : 3), climateEffects: { warm: 1, sunny: 1 } },
-  { id: "b", text: "我会选择机会与日常都能维持平衡的方案", effects: effect(d, 1), climateEffects: { cool: 1, dry: 1 } },
-  { id: "c", text: "我更愿意保留舒适、可持续的生活余地", effects: effect(d, 3), climateEffects: { humid: 1, warm: 1 } },
-  { id: "d", text: "我会先避开消耗自己、缺少安全感的选择", effects: effect(d, 2), climateEffects: { sunny: 1, cool: 1 } }
-];
-export const QUESTIONS: Question[] = DIMENSIONS.flatMap((dimension) => prompts[dimension].map((text, i) => ({ id: `${dimension.toLowerCase()}-${i + 1}`, version: 1, active: true, primaryDimension: dimension, anchor: i === 0, scenario: situations[i], semanticGroup: `${dimension}-${i}`, text, options: options(dimension) })));
-export const QUESTION_BANK_VERSION = "2026.08.v1";
+const cues: Record<LifeDimension, string[]> = {
+ AMB:["收入相同的 offer 摆在面前", "行业活动结束、有人递来名片", "准备转岗却没有熟人可问", "面试后站在地铁口", "周一早上打开招聘软件", "看到同龄人快速晋升", "一个新项目邀请你搬家", "回看过去三年的履历"],
+ PACE:["连续开完六场会以后", "早晨出门去上班时", "想到下周一时", "有权重设工作安排时", "晚上七点离开办公室时", "假期最后一个傍晚", "忙完一周的周六上午", "你观察一座城市的日常运行时"],
+ SOC:["刚搬进陌生小区的第一个月", "想认识新朋友的晚上", "筹备一次周末见面", "一周只剩两个空闲夜晚", "路过热闹街区时", "第一次和邻居打招呼时", "独自在城市过生日时", "安排长期社交关系时"],
+ NAT:["周六难得放晴", "计划两天短途逃离", "第一次看新房窗外", "情绪很满、想安静一会儿", "路过家附近公园", "周末只想离开水泥地", "想象五年后的日常", "在山海之间选居住地时"],
+ COST:["月租刚好超过预算", "结账时看到日常开销", "拿到一笔加薪以后", "朋友夸某城很有面子", "打开这个月的账单", "签下一年租约前", "为换城市列清单时", "听到有人抱怨房价时"],
+ ORDER:["早高峰被迫换乘三次", "要处理一项证件事务", "第一次走进一座城市", "考虑一段跨城通勤", "发现社区规则很细", "约人却被交通打乱", "搬家当天需要办很多事", "临时计划被天气打断时"],
+ CULT:["独处的周日下午", "收藏一座陌生城市时", "第一次逛一个街区", "感到生活有点干时", "夜幕刚落、还不想回家", "旅行只剩半天自由时间", "看到喜欢的演出开票", "别人问你城市有什么意思"],
+ FOOD:["加班到很晚以后", "初到一座城市的第一周", "想约朋友吃饭时", "查看租房周边地图", "朋友从外地来", "为一顿特别的饭排队", "深夜突然饿了", "形容一座城市的温度时"],
+ CLIM:["想象每天起床拉开窗帘", "连下几天雨以后", "冬天早晨走出家门", "八月中午必须出门", "一周没有看到太阳", "夏日周末安排户外", "出门前查看天气预报", "认真考虑长期迁居时"],
+ SPACE:["在面积和地段之间签约", "布置新家的晚上", "整天不出门的周末", "第一次考察新社区", "合租房又多住进一个人", "人潮太密集的街区", "拿到新房钥匙", "和邻居频繁碰面时"],
+ NOV:["看到街角开了一家新店", "翻年末城市活动日历", "职业选择出现新赛道", "偶然走进从没去过的街区", "生活像复制粘贴时", "关注城市新闻时", "朋友发来一场新展览", "在安稳和变化之间犹豫时"],
+ ROOT:["想象五年后的一个普通晚上", "决定是否续租的那天", "参加社区活动时", "第一次认真谈到安家", "遇到人生重要节点", "在两座城市之间做长期选择", "想到真正的安全感", "回答“哪里算家”时"]
+};
+const modes: Record<LifeDimension, [string,string,string,string]> = {
+ AMB:["我会选能接触更大项目和更多同行的地方","我会先看行业机会是否足够、生活是否能承受","我更看重长期积累，不急着挤进最热的中心","我愿意放弃一点曝光，换取稳定的成长节奏"],
+ PACE:["我愿意接受高密度安排，效率优先","我希望忙得有价值，但别占满所有晚上","我会把可步行、少通勤和能喘口气放在前面","我宁愿慢一点，也不想让日常长期失控"],
+ SOC:["我会主动往人多、活动多的地方靠","我喜欢有稳定朋友，也保留认识新人的机会","我更享受小范围、能深入聊天的关系","我需要足够的独处，社交不必成为日程"],
+ NAT:["我会把自然留给偶尔的周末远行","附近有公园和一两条散步路线就很好","我希望山、水或大绿地是生活的一部分","我会优先选择每天都能看见自然的地方"],
+ COST:["如果它能换来位置和机会，我愿意多花一点","预算可以上浮，但必须换到明显更好的体验","我会让住房和日常支出始终留有余地","我不会让城市成本挤掉储蓄和生活选择"],
+ ORDER:["我能接受一点混乱，只要机会够多","基本顺畅就好，不需要事事精确","我很在意公共服务、通勤和规则是否可靠","秩序感是我判断能不能长期住下去的底线"],
+ CULT:["文化活动是偶尔的加分项","有想去的展览、电影和书店就会很开心","我需要持续更新的内容来保持精神活力","没有文化空间和创作氛围，我会很快感到乏味"],
+ FOOD:["吃得方便就好，我不想为它安排太多时间","周末能找到几家喜欢的小店就够了","好吃和丰富会直接影响我留下来的意愿","我愿意围绕一顿饭认识街区、安排生活和关系"],
+ CLIM:["天气不必完美，我适应力还不错","只要极端天气不太频繁就能接受","我会认真躲开让我长期不舒服的季节","稳定的阳光、温湿度和户外条件是硬条件"],
+ SPACE:["我可以住得紧凑，把资源留给城市中心","私密空间够用，同时希望社区方便","我需要能放松、能待人的居住面积","住得宽松、有边界感，是长期幸福的前提"],
+ NOV:["变化太快会让我分心，我喜欢熟悉感","偶尔有新店新活动，会让我觉得刚刚好","我喜欢城市不断冒出新的职业和内容","如果生活没有新鲜事，我会很快想离开"],
+ ROOT:["我不介意阶段性迁移，先把眼前过好","只要有几段可靠关系，我哪里都能慢慢适应","我希望城市能容纳长期的伴侣、朋友与家庭","归属感、社区和未来规划会直接决定我留下来"]
+};
+const optionValues = (d: LifeDimension) => d === "PACE" || d === "COST" || d === "ROOT" ? [-3,-1,2,3] : [-2,0,2,3];
+const options = (d: LifeDimension, i: number): QuestionOption[] => modes[d].map((text, optionIndex) => ({ id: String.fromCharCode(97 + optionIndex), text: `${cues[d][i]}，${text}`, effects: effect(d, optionValues(d)[optionIndex]), climateEffects: optionIndex === 0 ? { warm: 1, sunny: 1 } : optionIndex === 1 ? { cool: 1, dry: 1 } : optionIndex === 2 ? { humid: 1, warm: 1 } : { sunny: 1, cool: 1 } }));
+export const QUESTIONS: Question[] = DIMENSIONS.flatMap((dimension) => prompts[dimension].map((text, i) => ({ id: `${dimension.toLowerCase()}-${i + 1}`, version: 2, active: true, primaryDimension: dimension, anchor: i === 0, scenario: situations[i], semanticGroup: `${dimension}-${i}`, text, options: options(dimension, i) })));
+export const QUESTION_BANK_VERSION = "2026.08.v2";
 export const dimensionLabel = (key: LifeDimension) => labels[key];

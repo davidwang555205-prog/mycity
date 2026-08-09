@@ -18,7 +18,7 @@ npm run simulate
 ## 技术与目录
 
 - Next.js 15、React 19、TypeScript、CSS（移动端优先）
-- `src/data/questions.ts`：V1 题库（96 题；每维度 1 个 anchor）
+- `src/data/questions.ts`：V2 题库（96 题；每维度 1 个 anchor；每题独立情境化选项）
 - `src/data/cities.ts`：30 个城市的 V1 编辑校准画像
 - `src/lib/engine.ts`：seeded sampling、画像评分、分维度城市匹配
 - `src/app/page.tsx`：Landing → Test → Free Result → Development Unlock → Report → Share Card
@@ -59,7 +59,7 @@ npm run simulate
 
 ## 数据版本
 
-- Question bank: `2026.08.v1`
+- Question bank: `2026.08.v2`
 - City profile: `2026.08.v1`
 - Matching: `2026.08.v1`
 
