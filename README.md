@@ -21,7 +21,7 @@ npm run simulate
 - `src/data/questions.ts`：V2 题库（96 题；每维度 1 个 anchor；每题独立情境化选项）
 - `src/data/cities.ts`：30 个城市的 V1 编辑校准画像
 - `src/lib/engine.ts`：seeded sampling、画像评分、分维度城市匹配
-- `src/app/page.tsx`：Landing → Test → Free Result → Development Unlock → Report → Share Card
+- `src/app/page.tsx`：Landing → Test → Full Result + Report → Share Card
 
 ## 测试逻辑
 
@@ -35,7 +35,11 @@ npm run simulate
 
 ## Product Status
 
-**V1 technical test build.** 已有匿名测试、确定性匹配、local persistence、Fallback Report、Mock Payment 与 PNG 分享卡流程。它不是移居、职业或财务建议。
+**V1 technical test build.** 已有匿名测试、确定性匹配、local persistence、Fallback Report 与 PNG 分享卡流程。它不是移居、职业或财务建议。
+
+## Distribution and Monetization
+
+The web application contains no checkout flow. Distribution and monetization happen externally: users who receive a URL can complete the full test, report and share card without further payment. `?src=xhs_post_01` 等来源参数会原样保存为 `acquisition_source`，用于后续归因；没有小红书订单验证、兑换码或账号系统。
 
 ## City Data Methodology
 
@@ -45,9 +49,9 @@ npm run simulate
 
 城市是生活条件的供给，匹配优先惩罚“用户的需要没有被满足”，并轻度惩罚过度供给；成本只在用户敏感度不足以覆盖城市成本时扣分。`npm run simulate` 用固定随机种子跑 10,000 个画像，输出四类榜单的城市分布，供校准复核。
 
-## Payment Integration Status
+## Legacy Payment Infrastructure
 
-`MockPaymentProvider` 已走通免费结果 → 创建支付 → paid callback → 解锁报告。未集成微信或支付宝；真实支付需要商户主体、回调 URL 与服务端验签，属于外部配置阻塞项。
+`PaymentProvider` / `MockPaymentProvider` 仍保留为未调用的 V1 实验基础设施，不属于当前用户路径。网站不会发起支付，也不进行微信、支付宝或小红书订单验证。
 
 ## LLM Integration Status
 
@@ -55,7 +59,7 @@ npm run simulate
 
 ## Deployment
 
-可部署至 Vercel。生产环境应配置 Supabase/PostgreSQL persistence adapter、支付 webhook、LLM provider 凭据与服务端报告缓存；无这些配置时保留 local/dev fallback。
+可部署至 Vercel。生产环境应配置 Supabase/PostgreSQL persistence adapter、LLM provider 凭据与服务端报告缓存；无这些配置时保留 local/dev fallback。页面通过 `noindex,nofollow` 和 robots 规则降低搜索发现概率；**noindex 不是访问控制**。
 
 ## 数据版本
 
@@ -66,7 +70,7 @@ npm run simulate
 ## Known Limitations
 
 - 当前 persistence 是浏览器 localStorage；生产环境应迁至匿名 session + PostgreSQL/Supabase。
-- 需补 `test_sessions`、`answers`、`life_profiles`、`city_results`、`payments`、`reports`、`analytics_events` 数据表和完整版本字段。
+- 需补 `test_sessions`、`answers`、`life_profiles`、`city_results`、`reports`、`analytics_events` 数据表和完整版本字段。
 - 浏览器 localStorage 已可保存报告；生产环境仍需真实 persistence adapter。
 - 分享卡由浏览器 Canvas 生成 1080×1440 PNG，尚未存入远端对象存储。
-- 需为每项城市标定补充可追踪来源和审校流程，并完成真实手机浏览器及生产支付/LLM E2E 验证。
+- 需为每项城市标定补充可追踪来源和审校流程，并完成真实手机浏览器及生产 LLM E2E 验证。
