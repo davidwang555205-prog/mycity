@@ -46,7 +46,8 @@ const modes: Record<LifeDimension, [string,string,string,string]> = {
  ROOT:["我不介意阶段性迁移，先把眼前过好","只要有几段可靠关系，我哪里都能慢慢适应","我希望城市能容纳长期的伴侣、朋友与家庭","归属感、社区和未来规划会直接决定我留下来"]
 };
 const optionValues = (d: LifeDimension) => d === "PACE" || d === "COST" || d === "ROOT" ? [-3,-1,2,3] : [-2,0,2,3];
-const options = (d: LifeDimension, i: number): QuestionOption[] => modes[d].map((text, optionIndex) => ({ id: String.fromCharCode(97 + optionIndex), text: `${cues[d][i]}，${text}`, effects: effect(d, optionValues(d)[optionIndex]), climateEffects: optionIndex === 0 ? { warm: 1, sunny: 1 } : optionIndex === 1 ? { cool: 1, dry: 1 } : optionIndex === 2 ? { humid: 1, warm: 1 } : { sunny: 1, cool: 1 } }));
+const answerOpeners = ["哪怕要付出更多精力，", "更理想的状态是，", "比起眼前的便利，", "对长期生活而言，"] as const;
+const options = (d: LifeDimension, _i: number): QuestionOption[] => modes[d].map((text, optionIndex) => ({ id: String.fromCharCode(97 + optionIndex), text: `${answerOpeners[optionIndex]}${text}`, effects: effect(d, optionValues(d)[optionIndex]), climateEffects: optionIndex === 0 ? { warm: 1, sunny: 1 } : optionIndex === 1 ? { cool: 1, dry: 1 } : optionIndex === 2 ? { humid: 1, warm: 1 } : { sunny: 1, cool: 1 } }));
 export const QUESTIONS: Question[] = DIMENSIONS.flatMap((dimension) => prompts[dimension].map((text, i) => ({ id: `${dimension.toLowerCase()}-${i + 1}`, version: 2, active: true, primaryDimension: dimension, anchor: i === 0, scenario: situations[i], semanticGroup: `${dimension}-${i}`, text, options: options(dimension, i) })));
 export const QUESTION_BANK_VERSION = "2026.08.v2";
 export const dimensionLabel = (key: LifeDimension) => labels[key];
