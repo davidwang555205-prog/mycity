@@ -10,6 +10,7 @@ npm run dev
 npm run lint
 npm test
 npm run build
+npm run simulate
 ```
 
 默认地址为 `http://localhost:3000`。当前没有必需环境变量；完整报告在开发模式下由 deterministic fallback 直接生成。正式接入 LLM 或支付前，需通过 Provider Adapter 注入，并保留报告版本与 session 的持久化关联。
@@ -30,7 +31,31 @@ npm run build
 
 城市排名不由 LLM 决定。流程为：答案 → `LifeProfile` → matching engine → 四类固定 ranking（命定/事业/舒服生活/相对不适配）→ fallback 报告。V1 匹配将基础生活方式、职业倾向、成本兼容性与气候偏好拆分计算；权重集中在 `src/lib/engine.ts`，后续应迁入独立的 `matching.config.ts`。
 
-城市分数是用于产品体验的编辑校准，`sources` 字段已预留，当前不应被视作客观城市排名或事实数据库。
+城市分数是用于产品体验的编辑校准，不能被视作客观城市排名或事实数据库。
+
+## Product Status
+
+**V1 technical test build.** 已有匿名测试、确定性匹配、local persistence、Fallback Report、Mock Payment 与 PNG 分享卡流程。它不是移居、职业或财务建议。
+
+## City Data Methodology
+
+每个城市的 12 个指标带 `objective`、`derived` 或 `editorial` 来源类型及 0–1 置信度。气候、成本与自然资源归为 objective；产业机会、文化与公共效率为 derived；松弛感、社交、饮食与扎根感明确为 editorial。V1 不把编辑判断表述为客观城市事实；正式发布前须为 objective/derived 指标补逐城可访问 URL 和年份审校。
+
+## Matching Methodology
+
+城市是生活条件的供给，匹配优先惩罚“用户的需要没有被满足”，并轻度惩罚过度供给；成本只在用户敏感度不足以覆盖城市成本时扣分。`npm run simulate` 用固定随机种子跑 10,000 个画像，输出四类榜单的城市分布，供校准复核。
+
+## Payment Integration Status
+
+`MockPaymentProvider` 已走通免费结果 → 创建支付 → paid callback → 解锁报告。未集成微信或支付宝；真实支付需要商户主体、回调 URL 与服务端验签，属于外部配置阻塞项。
+
+## LLM Integration Status
+
+`FallbackReportProvider` 生成可用报告并按版本 key 缓存；`LLMReportProvider` 已留接口，当前安全地 fallback，不读取原始题目答案或改写城市排名。
+
+## Deployment
+
+可部署至 Vercel。生产环境应配置 Supabase/PostgreSQL persistence adapter、支付 webhook、LLM provider 凭据与服务端报告缓存；无这些配置时保留 local/dev fallback。
 
 ## 数据版本
 
@@ -38,10 +63,10 @@ npm run build
 - City profile: `2026.08.v1`
 - Matching: `2026.08.v1`
 
-## 当前限制与正式上线待办
+## Known Limitations
 
 - 当前 persistence 是浏览器 localStorage；生产环境应迁至匿名 session + PostgreSQL/Supabase。
-- 需补 `test_sessions`、`answers`、`life_profiles`、`city_results`、`payments`、`reports`、`share_cards` 数据表和完整版本字段。
-- 需实现真正的 `PaymentProvider` 与报告持久化，避免刷新重新生成报告。
-- 分享卡目前是可视化预览；上线前需增加 1080×1440 导出图片。
+- 需补 `test_sessions`、`answers`、`life_profiles`、`city_results`、`payments`、`reports`、`analytics_events` 数据表和完整版本字段。
+- 浏览器 localStorage 已可保存报告；生产环境仍需真实 persistence adapter。
+- 分享卡由浏览器 Canvas 生成 1080×1440 PNG，尚未存入远端对象存储。
 - 需为每项城市标定补充可追踪来源和审校流程，并完成真实手机浏览器及生产支付/LLM E2E 验证。
