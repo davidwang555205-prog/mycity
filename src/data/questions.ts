@@ -31,23 +31,22 @@ const cues: Record<LifeDimension, string[]> = {
  NOV:["看到街角开了一家新店", "翻年末城市活动日历", "职业选择出现新赛道", "偶然走进从没去过的街区", "生活像复制粘贴时", "关注城市新闻时", "朋友发来一场新展览", "在安稳和变化之间犹豫时"],
  ROOT:["想象五年后的一个普通晚上", "决定是否续租的那天", "参加社区活动时", "第一次认真谈到安家", "遇到人生重要节点", "在两座城市之间做长期选择", "想到真正的安全感", "回答“哪里算家”时"]
 };
-const modes: Record<LifeDimension, [string,string,string,string]> = {
- AMB:["我会选能接触更大项目和更多同行的地方","我会先看行业机会是否足够、生活是否能承受","我更看重长期积累，不急着挤进最热的中心","我愿意放弃一点曝光，换取稳定的成长节奏"],
- PACE:["我愿意接受高密度安排，效率优先","我希望忙得有价值，但别占满所有晚上","我会把可步行、少通勤和能喘口气放在前面","我宁愿慢一点，也不想让日常长期失控"],
- SOC:["我会主动往人多、活动多的地方靠","我喜欢有稳定朋友，也保留认识新人的机会","我更享受小范围、能深入聊天的关系","我需要足够的独处，社交不必成为日程"],
- NAT:["我会把自然留给偶尔的周末远行","附近有公园和一两条散步路线就很好","我希望山、水或大绿地是生活的一部分","我会优先选择每天都能看见自然的地方"],
- COST:["如果它能换来位置和机会，我愿意多花一点","预算可以上浮，但必须换到明显更好的体验","我会让住房和日常支出始终留有余地","我不会让城市成本挤掉储蓄和生活选择"],
- ORDER:["我能接受一点混乱，只要机会够多","基本顺畅就好，不需要事事精确","我很在意公共服务、通勤和规则是否可靠","秩序感是我判断能不能长期住下去的底线"],
- CULT:["文化活动是偶尔的加分项","有想去的展览、电影和书店就会很开心","我需要持续更新的内容来保持精神活力","没有文化空间和创作氛围，我会很快感到乏味"],
- FOOD:["吃得方便就好，我不想为它安排太多时间","周末能找到几家喜欢的小店就够了","好吃和丰富会直接影响我留下来的意愿","我愿意围绕一顿饭认识街区、安排生活和关系"],
- CLIM:["天气不必完美，我适应力还不错","只要极端天气不太频繁就能接受","我会认真躲开让我长期不舒服的季节","稳定的阳光、温湿度和户外条件是硬条件"],
- SPACE:["我可以住得紧凑，把资源留给城市中心","私密空间够用，同时希望社区方便","我需要能放松、能待人的居住面积","住得宽松、有边界感，是长期幸福的前提"],
- NOV:["变化太快会让我分心，我喜欢熟悉感","偶尔有新店新活动，会让我觉得刚刚好","我喜欢城市不断冒出新的职业和内容","如果生活没有新鲜事，我会很快想离开"],
- ROOT:["我不介意阶段性迁移，先把眼前过好","只要有几段可靠关系，我哪里都能慢慢适应","我希望城市能容纳长期的伴侣、朋友与家庭","归属感、社区和未来规划会直接决定我留下来"]
+const answerTemplates: Record<LifeDimension, [(cue: string) => string, (cue: string) => string, (cue: string) => string, (cue: string) => string]> = {
+ AMB:[cue=>`${cue}，我愿意把自己放进更大的项目和更强的同行之间。`,cue=>`遇到${cue}，我会先确认机会够不够，也要算清生活代价。`,cue=>`${cue}时，我不急着挤进最热的中心，能持续积累更重要。`,cue=>`如果正值${cue}，少一点曝光没关系，我想把成长节奏走稳。`],
+ PACE:[cue=>`${cue}时，行程紧一点可以，先把效率放在前面。`,cue=>`面对${cue}，我希望事情值得忙，但别吞掉每个晚上。`,cue=>`${cue}以后，我会优先选少通勤、能步行、能喘口气的日常。`,cue=>`一想到${cue}，我宁愿慢一点，也不想把日子过到长期失控。`],
+ SOC:[cue=>`${cue}时，我会主动往人多、活动多的地方靠。`,cue=>`关于${cue}，有熟人可见，也有机会认识新人，刚刚好。`,cue=>`${cue}让我更想要小范围但能认真聊天的关系。`,cue=>`碰上${cue}，我会把独处留出来，社交不必排成日程。`],
+ NAT:[cue=>`自然不必占满每天，${cue}时我会认真安排一次远行。`,cue=>`离家不远有座能常去的公园，对${cue}已经很够用。`,cue=>`我会把山、水或大片绿地纳入日常；${cue}尤其如此。`,cue=>`${cue}会让我确定：每天能看见自然才是优先条件。`],
+ COST:[cue=>`${cue}时，只要能换来位置和机会，我愿意多付一点。`,cue=>`面对${cue}，预算可以上浮，但得换到明显更好的体验。`,cue=>`${cue}让我更在意住房和日常开销是否还能留出余地。`,cue=>`如果因为${cue}要做取舍，我不会让城市成本挤掉储蓄和选择。`],
+ ORDER:[cue=>`${cue}时，一点混乱可以忍，只要机会够多。`,cue=>`关于${cue}，基本顺畅就好，我不要求每件事都严丝合缝。`,cue=>`${cue}会让我认真看公共服务、通勤和规则到底靠不靠谱。`,cue=>`一遇到${cue}，秩序感就成了我判断能不能久住的底线。`],
+ CULT:[cue=>`${cue}时，文化活动是加分项，有最好，没有也能过。`,cue=>`碰到${cue}，附近有展览、电影或书店就会让我很开心。`,cue=>`${cue}让我意识到，我需要不断更新的内容给精神充电。`,cue=>`如果连${cue}都找不到文化空间和创作氛围，我很快会觉得乏味。`],
+ FOOD:[cue=>`${cue}时，吃得方便就够了，我不想为一顿饭费太多心思。`,cue=>`关于${cue}，能找到几家愿意反复去的小店，我就满足。`,cue=>`${cue}会直接影响我想不想留下：食物得好吃，也得有选择。`,cue=>`一想到${cue}，我愿意围绕吃饭认识街区，也把人约出来。`],
+ CLIM:[cue=>`${cue}时，天气不必完美，我的适应力还不错。`,cue=>`面对${cue}，只要极端天气别太频繁，我大多能接受。`,cue=>`${cue}会让我认真避开那些长期消耗自己的季节。`,cue=>`如果${cue}变成日常，稳定的阳光、温湿度和户外条件就是硬条件。`],
+ SPACE:[cue=>`${cue}时，住得紧凑也可以，我愿意把资源留给城市中心。`,cue=>`关于${cue}，私密空间够用，同时社区方便，我就能住得舒心。`,cue=>`${cue}让我更需要一个能放松、能待人的家。`,cue=>`一想到${cue}，住得宽松、有边界感就是长期幸福的前提。`],
+ NOV:[cue=>`${cue}时，变化太快会让我分心，我还是偏向熟悉的节奏。`,cue=>`碰上${cue}，偶尔冒出新店或新活动，会让我觉得生活刚刚好。`,cue=>`${cue}让我期待城市不断出现新的职业机会和内容。`,cue=>`如果${cue}之后生活还是一成不变，我很快就会想离开。`],
+ ROOT:[cue=>`阶段性迁移也没问题；${cue}时，我会先把眼前的生活过好。`,cue=>`面对${cue}，只要有几段可靠关系，我在哪里都能慢慢适应。`,cue=>`我会先看这座城能否容纳伴侣、朋友和家庭，尤其是${cue}。`,cue=>`当我认真想${cue}，归属感、社区和未来规划会决定我是否留下。`]
 };
 const optionValues = (d: LifeDimension) => d === "PACE" || d === "COST" || d === "ROOT" ? [-3,-1,2,3] : [-2,0,2,3];
-const answerOpeners = ["哪怕要付出更多精力，", "更理想的状态是，", "比起眼前的便利，", "对长期生活而言，"] as const;
-const options = (d: LifeDimension, _i: number): QuestionOption[] => modes[d].map((text, optionIndex) => ({ id: String.fromCharCode(97 + optionIndex), text: `${answerOpeners[optionIndex]}${text}`, effects: effect(d, optionValues(d)[optionIndex]), climateEffects: optionIndex === 0 ? { warm: 1, sunny: 1 } : optionIndex === 1 ? { cool: 1, dry: 1 } : optionIndex === 2 ? { humid: 1, warm: 1 } : { sunny: 1, cool: 1 } }));
-export const QUESTIONS: Question[] = DIMENSIONS.flatMap((dimension) => prompts[dimension].map((text, i) => ({ id: `${dimension.toLowerCase()}-${i + 1}`, version: 2, active: true, primaryDimension: dimension, anchor: i === 0, scenario: situations[i], semanticGroup: `${dimension}-${i}`, text, options: options(dimension, i) })));
-export const QUESTION_BANK_VERSION = "2026.08.v2";
+const options = (d: LifeDimension, i: number): QuestionOption[] => answerTemplates[d].map((template, optionIndex) => ({ id: String.fromCharCode(97 + optionIndex), text: template(cues[d][i]), effects: effect(d, optionValues(d)[optionIndex]), climateEffects: optionIndex === 0 ? { warm: 1, sunny: 1 } : optionIndex === 1 ? { cool: 1, dry: 1 } : optionIndex === 2 ? { humid: 1, warm: 1 } : { sunny: 1, cool: 1 } }));
+export const QUESTIONS: Question[] = DIMENSIONS.flatMap((dimension) => prompts[dimension].map((text, i) => ({ id: `${dimension.toLowerCase()}-${i + 1}`, version: 3, active: true, primaryDimension: dimension, anchor: i === 0, scenario: situations[i], semanticGroup: `${dimension}-${i}`, text, options: options(dimension, i) })));
+export const QUESTION_BANK_VERSION = "2026.08.v3";
 export const dimensionLabel = (key: LifeDimension) => labels[key];

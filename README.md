@@ -63,7 +63,7 @@ The web application contains no checkout flow. Distribution and monetization hap
 
 ## 数据版本
 
-- Question bank: `2026.08.v2`
+- Question bank: `2026.08.v3`
 - City profile: `2026.08.v1`
 - Matching: `2026.08.v1`
 
