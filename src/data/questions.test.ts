@@ -11,5 +11,6 @@ describe("question answer wording", () => {
 
     const texts = QUESTIONS.flatMap((question) => question.options.map((option) => option.text));
     expect(new Set(texts).size).toBe(384);
+    expect(texts.every((text) => text.length <= 22)).toBe(true);
   });
 });
